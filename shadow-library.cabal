@@ -17,19 +17,14 @@ library
   hs-source-dirs:      .
   exposed-modules:     ShadowLibrary.Core
   build-depends:       base >= 4.7 && < 5
-                     , curl
                      , HTTP
                      , hxt
-                     , hxt-curl
                      , hxt-http
                      , hxt-xpath
                      , MissingH
                      , monad-logger
                      , mtl
                      , network-uri
-                     , persistent
-                     , persistent-postgresql
-                     , persistent-template
                      , regex-pcre
                      , regex-tdfa
                      , resourcet
@@ -58,7 +53,6 @@ executable almanachmuszyny
    ghc-options:         -threaded -rtsopts -with-rtsopts=-N
    build-depends:       base
                       , hxt
-                      , hxt-curl
                       , hxt-xpath
                       , MissingH
                       , regex-posix

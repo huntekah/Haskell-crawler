@@ -6,9 +6,9 @@
 
 module ShadowLibrary.Core where
 
-import Database.Persist
-import Database.Persist.TH
-import Database.Persist.Postgresql
+-- import Database.Persist
+-- import Database.Persist.TH
+-- import Database.Persist.Postgresql
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger (runNoLoggingT)
 import Control.Monad.Trans.Resource (runResourceT)
@@ -33,7 +33,7 @@ import Data.Tree.NTree.TypeDefs
 import Data.Maybe
 import Control.Monad.Trans
 import Text.XML.HXT.XPath
-import Text.XML.HXT.Curl
+-- import Text.XML.HXT.Curl
 import Text.XML.HXT.HTTP
 
 import Text.Regex.TDFA
@@ -42,7 +42,7 @@ import Data.List (isInfixOf, intercalate)
 
 import Data.List.Utils (replace)
 
-import Network.Curl.Opts
+-- import Network.Curl.Opts
 
 polishTimeZone = TimeZone {
   timeZoneMinutes = 120,
@@ -64,8 +64,8 @@ downloadDocument = readFromDocument [withParseHTML yes,
                                      withEncodingErrors no,
                                      withPreserveComment yes,
                                      withStrictInput yes,
---                                     withHTTP []
-                                     withCurl [("curl--user-agent","AMU Digital Libraries Indexing Agent")]
+                                     withHTTP []
+--                                     withCurl [("curl--user-agent","AMU Digital Libraries Indexing Agent")]
                                     ]
 
 downloadDocumentWithEncoding enc = readFromDocument [withParseHTML yes,
@@ -73,11 +73,13 @@ downloadDocumentWithEncoding enc = readFromDocument [withParseHTML yes,
                                                      withEncodingErrors no,
                                                      withPreserveComment yes,
                                                      withInputEncoding enc,
-                                                     withCurl []]
+					             withHTTP []]		
+--                                                     withCurl []]
 
 downloadXmlDocument = readFromDocument [withWarnings no,
                                         withEncodingErrors no,
-                                        withCurl [] ]
+					withHTTP []]
+--                                        withCurl [] ]
 
 
 data ShadowLibrary = ShadowLibrary { logoUrl :: Maybe String,
@@ -110,110 +112,6 @@ defaultShadowItem url title = ShadowItem {
   finalUrl = url,
   description = Nothing }
 
-
-share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
-Library sql=libraries
-    logoUrl String Maybe sql=logo_url
-    lname String
-    abbrev String
-    UniqueLname lname
-    UniqueAbbrev abbrev
-    webpage String Maybe
-    numberOfInstitutions Int Maybe sql=number_of_institutions
-    availablePublications Int Maybe sql=available_publications
-    plannedPublication Int Maybe sql=planned_publication
-    oaiAvailable String Maybe sql=oai_available
-    oaiPlanned String Maybe sql=oai_planned
-    lLevel Int Maybe sql=llevel
-    deriving Show
-Item sql=items
-       url String Maybe
-       wid String Maybe
-       title String Maybe
-       body String Maybe
-       address String Maybe
-       itype String
-       published UTCTime Maybe
-       modified UTCTime Maybe
-       durationStart UTCTime Maybe sql=duration_start
-       durationEnd UTCTime Maybe sql=duration_end
---       added UTCTime default=now()
-       parent Int Maybe
-       arenaDir String Maybe sql=arena_dir
-       creator String Maybe
-       subject String Maybe
-       description String Maybe
-       publisher String Maybe
-       contributor String Maybe
-       originalDate String Maybe sql=original_date
-       originalType String Maybe sql=original_type
-       format String Maybe
-       originalIdentifier String Maybe sql=original_identifier
-       originalSource String Maybe sql=original_source
-       lang String Maybe
-       relation String Maybe
-       coverage String Maybe
-       rights String Maybe
-       library LibraryId
-       finalUrl String Maybe sql=final_url
-       downloaded Bool
-       totbibbed Bool
-       oaiIdentifier String Maybe sql=oai_identifier
-       deriving Show
-  |]
-
-defaultItem libraryId = Item {
-  itemUrl = Nothing,
-  itemWid = Nothing,
-  itemTitle = Nothing,
-  itemBody = Nothing,
-  itemAddress = Nothing,
-  itemItype = "periodical",
-  itemPublished = Nothing,
-  itemModified = Nothing,
-  itemDurationStart = Nothing,
-  itemDurationEnd = Nothing,
---  itemAdded = Nothing,
-  itemParent = Nothing,
-  itemArenaDir = Nothing,
-  itemCreator = Nothing,
-  itemSubject = Nothing,
-  itemDescription = Nothing,
-  itemPublisher = Nothing,
-  itemContributor = Nothing,
-  itemOriginalDate = Nothing,
-  itemOriginalType = Nothing,
-  itemFormat = Just "pdf",
-  itemOriginalIdentifier = Nothing,
-  itemOriginalSource = Nothing,
-  itemLang = Just "pol",
-  itemRelation = Nothing,
-  itemCoverage = Nothing,
-  itemRights = Nothing,
-  itemLibrary = libraryId,
-  itemFinalUrl = Nothing,
-  itemDownloaded = False,
-  itemTotbibbed = False,
-  itemOaiIdentifier = Nothing}
-
-shadowToOAI :: ShadowLibrary -> Library
-shadowToOAI shadowLibrary = Library (logoUrl shadowLibrary) (lname shadowLibrary) (abbrev shadowLibrary) (Just $ webpage shadowLibrary) Nothing Nothing Nothing Nothing Nothing (Just $ lLevel shadowLibrary)
-
-shadowItemToOAI libraryId shadowItem = (defaultItem libraryId) {
-     itemUrl = url shadowItem,
-     itemTitle = Just $ strip $ title shadowItem,
-     itemItype = itype shadowItem,
-     itemOriginalDate = originalDate shadowItem,
-     itemCreator = creator shadowItem,
-     itemFormat = format shadowItem,
-     itemLang = lang shadowItem,
-     itemFinalUrl = Just $ finalUrl shadowItem,
-     itemDurationStart = durationStart,
-     itemDurationEnd = durationEnd,
-     itemDescription = description shadowItem
-     }
-   where
-     (durationStart, durationEnd) = getDuration $ originalDate shadowItem
 
 getDuration :: Maybe String -> (Maybe UTCTime, Maybe UTCTime)
 getDuration Nothing = (Nothing, Nothing)
@@ -259,13 +157,6 @@ localTimeToTimeStamp ltime = localTimeToUTCTZ (tzByLabel Europe__Warsaw) ltime
 --  zonedTimeToUTC $ ZonedTime {
 --  zonedTimeToLocalTime = ltime,
 --  zonedTimeZone = timeZoneForUTCTime Europe__Warsaw }
-
-getLibraryId library = do
-  ent <- getBy (UniqueLname $ libraryLname library)
-  libraryId <- case ent of
-      Just (Entity key _) -> return key
-      Nothing -> insert library
-  return libraryId
 
 extractLinks xpathCondition = (downloadDocument &&& this)
                               >>> first (getXPathTrees xpathCondition
@@ -338,22 +229,6 @@ extractNext xpathConditionForNext = listA
                                            >>> expandURIFixed)
                                     >>> arr listToMaybe
 
-
-dbSpecification = "host=localhost dbname=oai"
-
-dbConnection = withPostgresqlConn dbSpecification
-
-runOnDb = runNoLoggingT . runResourceT . dbConnection . runSqlConn
-
-insertIntoDatabase shadowLibrary items = runOnDb $ insertIntoDatabaseCore shadowLibrary items
-
-insertIntoDatabaseCore :: MonadIO m => ShadowLibrary
-                      -> [ShadowItem]
-                      -> ReaderT SqlBackend m ()
-insertIntoDatabaseCore shadowLibrary items = do
-  libraryId <- getLibraryId $ shadowToOAI shadowLibrary
-  let ritems = map (shadowItemToOAI libraryId) items
-  mapM_ insert ritems
 
 extractFormat :: String -> Maybe String
 extractFormat finalUrl
