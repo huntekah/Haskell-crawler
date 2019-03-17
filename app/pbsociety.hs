@@ -13,11 +13,11 @@ import Text.Printf
 
 --getFirst :: ([Char], [Char]) -> [Char]
 --getFirst ([a],[b]) = fst
-eatArg (a,b) = a
+--eatArg (a,b) = a
 
 extractRecords = extractLinksWithText "//li//ul//div[@class='artifact-title']//a"
---                 >>> second (arr $ replace "\r\n              " "")
---                 >>> first (arr ((++"tr") . init))
+                 >>> second (arr $ replace "\r\n              " "")
+                 >>> first (arr ((++"tr") . init))
                  >>> first (extractLinksWithText "//div[@class='artifact-title']//a")
                 -- >>> second (first (arr $ replace "\r\n              " "" .init))
  --                >>> first (first (arr ((++"tr") . init)))
