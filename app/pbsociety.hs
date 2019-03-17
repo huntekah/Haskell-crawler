@@ -11,16 +11,20 @@ import Data.List.Utils (replace)
 import Text.Regex.Posix
 import Text.Printf
 
-extractRecords = extractLinksWithText "//li//ul//div[@class='artifact-title']//a"
-                 >>> second (arr $ replace "\r\n              " "")
-                 >>> first (arr ((++"tr") . init))
-                 >>> first (extractLinksWithText "//div[@class='artifact-title']//a")
-                 >>> second (arr $ replace "\r\n              " "")
-                 >>> first (arr ((++"tr") . init))
-                 >>> first (extractLinksWithText "//div[@class='file-link']/a[contains(@href,'.pdf')]")
+--getFirst :: ([Char], [Char]) -> [Char]
+--getFirst ([a],[b]) = fst
+eatArg (a,b) = a
 
-toShadowItem :: ((String, String), String) -> ShadowItem
-toShadowItem ((url, articleTitle), yearlyTitle) =
+extractRecords = extractLinksWithText "//li//ul//div[@class='artifact-title']//a"
+--                 >>> second (arr $ replace "\r\n              " "")
+--                 >>> first (arr ((++"tr") . init))
+                 >>> first (extractLinksWithText "//div[@class='artifact-title']//a")
+                -- >>> second (first (arr $ replace "\r\n              " "" .init))
+ --                >>> first (first (arr ((++"tr") . init)))
+                 >>> first (first (extractLinksWithText "//div[@class='file-link']/a[contains(@href,'.pdf')]"))
+  
+toShadowItem :: (((String, String), String), String) -> ShadowItem
+toShadowItem (((url, articleTitle), yearlyTitle), _) =
   (defaultShadowItem url title) {
     originalDate = Just date,
     itype = "periodical",
