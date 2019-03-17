@@ -20,6 +20,7 @@ library
                      , HTTP
                      , hxt
                      , hxt-http
+                     , hxt-curl
                      , hxt-xpath
                      , MissingH
                      , monad-logger
@@ -54,6 +55,7 @@ executable almanachmuszyny
    build-depends:       base
                       , hxt
                       , hxt-xpath
+                      , hxt-curl
                       , MissingH
                       , regex-posix
                       , shadow-library
