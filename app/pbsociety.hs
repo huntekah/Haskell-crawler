@@ -15,7 +15,7 @@ import Text.Printf
 --getFirst ([a],[b]) = fst
 --eatArg (a,b) = a
 
-extractRecords = extractLinksWithText "(//li//ul//div[@class='artifact-title']//a)[1]"
+extractRecords = extractLinksWithText "(//li//ul//div[@class='artifact-title']//a)"
                  >>> second (arr $ replace "\r\n              " "")
                  >>> first (extractLinksWithText "//div[@class='artifact-title']//a")
                 -- >>> snd (first (arr $ replace "\r\n              " "" .init))
