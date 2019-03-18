@@ -4,7 +4,7 @@ import ShadowLibrary.Core
 
 import Text.XML.HXT.Core
 import Text.XML.HXT.XPath
--- import Text.XML.HXT.Curl
+--import Text.XML.HXT.Curl
 import Data.List
 import Data.List.Utils (replace)
 

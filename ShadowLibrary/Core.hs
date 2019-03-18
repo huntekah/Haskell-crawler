@@ -33,7 +33,7 @@ import Data.Tree.NTree.TypeDefs
 import Data.Maybe
 import Control.Monad.Trans
 import Text.XML.HXT.XPath
--- import Text.XML.HXT.Curl
+import Text.XML.HXT.Curl
 import Text.XML.HXT.HTTP
 
 import Text.Regex.TDFA
@@ -64,8 +64,8 @@ downloadDocument = readFromDocument [withParseHTML yes,
                                      withEncodingErrors no,
                                      withPreserveComment yes,
                                      withStrictInput yes,
-                                     withHTTP []
---                                     withCurl [("curl--user-agent","AMU Digital Libraries Indexing Agent")]
+--                                     withHTTP []
+                                     withCurl [("curl--user-agent","AMU Digital Libraries Indexing Agent")]
                                     ]
 
 downloadDocumentWithEncoding enc = readFromDocument [withParseHTML yes,
@@ -73,13 +73,13 @@ downloadDocumentWithEncoding enc = readFromDocument [withParseHTML yes,
                                                      withEncodingErrors no,
                                                      withPreserveComment yes,
                                                      withInputEncoding enc,
-					             withHTTP []]		
---                                                     withCurl []]
+--                       		             withHTTP []]
+                                                     withCurl []]
 
 downloadXmlDocument = readFromDocument [withWarnings no,
                                         withEncodingErrors no,
-					withHTTP []]
---                                        withCurl [] ]
+--					withHTTP []]
+                                        withCurl [] ]
 
 
 data ShadowLibrary = ShadowLibrary { logoUrl :: Maybe String,
