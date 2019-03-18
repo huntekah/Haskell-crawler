@@ -15,28 +15,28 @@ import Text.Printf
 --getFirst ([a],[b]) = fst
 --eatArg (a,b) = a
 
-extractRecords = extractLinksWithText "//li//ul//div[@class='artifact-title']//a"
+extractRecords = extractLinksWithText "(//li//ul//div[@class='artifact-title']//a)[1]"
                  >>> second (arr $ replace "\r\n              " "")
-                 >>> first (arr ((++"tr") . init))
                  >>> first (extractLinksWithText "//div[@class='artifact-title']//a")
-                -- >>> second (first (arr $ replace "\r\n              " "" .init))
+                -- >>> snd (first (arr $ replace "\r\n              " "" .init))
  --                >>> first (first (arr ((++"tr") . init)))
                  >>> first (first (extractLinksWithText "//div[@class='file-link']/a[contains(@href,'.pdf')]"))
   
 toShadowItem :: (((String, String), String), String) -> ShadowItem
-toShadowItem (((url, articleTitle), yearlyTitle), _) =
+toShadowItem (((url, _), articleTitle), sectionTitle) =
   (defaultShadowItem url title) {
     originalDate = Just date,
     itype = "periodical",
     format = Just "pdf",
     finalUrl = url
     }
-  where title = "PBStitle" ++ yearlyTitle ++ " " ++ (replace "\r\n" "" (replace "\r\n          " "" articleTitle))
+  where title = "PBS: " ++ (replace "\n" ""  sectionTitle) ++ (replace "\r\n" "" (replace "\r\n          " "" articleTitle))
         date = getDate url
 
 getDate url =
-  case url =~~ "/(19[0-9][0-9]|20[0-9][0-9])/" :: Maybe [[String]] of
+  case url =~~ "/(19[0-9][0-9]|20[0-9][0-9])." :: Maybe [[String]] of
     Just [[_, year]] -> year
+    Just [[[_,_],year],_] -> year
     otherwise -> error $ "unexpected url: " ++ url
 
 
