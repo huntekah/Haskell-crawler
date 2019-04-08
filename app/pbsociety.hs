@@ -15,22 +15,22 @@ import Text.Printf
 --getFirst ([a],[b]) = fst
 --eatArg (a,b) = a
 
-extractRecords = extractLinksWithText "(//li//ul//div[@class='artifact-title']//a)"
+extractRecords = extractLinksWithText "(//ul//li//div[@class='artifact-title']//a)"
                  >>> second (arr $ replace "\r\n              " "")
-                 >>> first (extractLinksWithText "//div[@class='artifact-title']//a")
+                -- >>> first (extractLinksWithText "//div[@class='artifact-title']//a")
                 -- >>> snd (first (arr $ replace "\r\n              " "" .init))
  --                >>> first (first (arr ((++"tr") . init)))
-                 >>> first (first (extractLinksWithText "//div[@class='file-link']/a[contains(@href,'.pdf')]"))
+                 >>> first (extractLinksWithText "//div[@class='file-link']/a[contains(@href,'.pdf')]")
   
-toShadowItem :: (((String, String), String), String) -> ShadowItem
-toShadowItem (((url, _), articleTitle), sectionTitle) =
+toShadowItem :: ((String, String), String) -> ShadowItem
+toShadowItem ((url, _), sectionTitle) =
   (defaultShadowItem url title) {
     originalDate = Just date,
     itype = "periodical",
     format = Just "pdf",
     finalUrl = url
     }
-  where title = "PBS: " ++ (replace "\n" ""  sectionTitle) ++ (replace "\r\n" "" (replace "\r\n          " "" articleTitle))
+  where title = "PBS: " ++ (replace "\n" ""  sectionTitle)
         date = getDate url
 
 getDate url =
@@ -41,7 +41,8 @@ getDate url =
 
 
 main = do
-    let start = "https://pbsociety.org.pl/repository/community-list"
+    let start = "https://pbsociety.org.pl/repository/discover?rpp=1000" 
+    --let start = "https://pbsociety.org.pl/repository/community-list"
     let shadowLibrary = ShadowLibrary {logoUrl=Nothing,
                                        lname="Polskie Towarzystwo Botaniczne",
                                        abbrev="pbsociety",
